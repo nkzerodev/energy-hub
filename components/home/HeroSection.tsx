@@ -34,7 +34,7 @@ const features = [
 	},
 ];
 
-const contactEmail = "tuemail@ejemplo.com";
+const contactEmail = "neekisamezero+energy-hub@gmail.com";
 
 const contactSubject = encodeURIComponent("Sugerencia para Energy Hub");
 const contactBody = encodeURIComponent(
