@@ -9,6 +9,21 @@ import { PowerStation } from "@/types/powerstation";
 import Link from "next/link";
 import Image from "next/image";
 
+function getAssetPath(path: string) {
+  if (typeof window === "undefined") {
+    return path;
+  }
+
+  const pathname = window.location.pathname;
+  const repoPrefix = pathname.split("/")[1];
+
+  if (repoPrefix && path.startsWith("/")) {
+    return `/${repoPrefix}${path}`;
+  }
+
+  return path;
+}
+
 interface Props {
 
     station: PowerStation;
@@ -48,7 +63,7 @@ export default function PowerStationCard({
             <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-900 via-black to-zinc-950">
 
                 <Image
-                    src={station.image ?? "/images/powerstations/placeholder.svg"}
+                    src={getAssetPath(station.image ?? "/images/powerstations/placeholder.svg")}
                     alt={`${station.brand} ${station.model}`}
                     width={800}
                     height={520}

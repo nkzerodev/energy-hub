@@ -16,6 +16,22 @@ import { PowerStation } from "@/types/powerstation";
 import { isFavoriteStation, toggleFavoriteStation } from "@/lib/favorites";
 
 
+function getAssetPath(path: string) {
+  if (typeof window === "undefined") {
+    return path;
+  }
+
+  const pathname = window.location.pathname;
+  const repoPrefix = pathname.split("/")[1];
+
+  if (repoPrefix && path.startsWith("/")) {
+    return `/${repoPrefix}${path}`;
+  }
+
+  return path;
+}
+
+
 interface Props {
   station: PowerStation;
 }
@@ -100,7 +116,7 @@ export default function StationHero({ station }: Props) {
         ">
 
           <Image
-            src={station.image ?? "/images/powerstations/placeholder.svg"}
+            src={getAssetPath(station.image ?? "/images/powerstations/placeholder.svg")}
             alt={`${station.brand} ${station.model}`}
             width={800}
             height={520}

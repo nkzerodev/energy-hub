@@ -44,8 +44,23 @@ const links = [
   },
 ];
 
+function normalizePath(pathname: string) {
+  if (!pathname) return "/";
+
+  const repoPrefix = typeof window !== "undefined"
+    ? window.location.pathname.split("/")[1]
+    : "";
+
+  if (repoPrefix && pathname.startsWith(`/${repoPrefix}/`)) {
+    return pathname.replace(`/${repoPrefix}`, "") || "/";
+  }
+
+  return pathname;
+}
+
 export default function Navbar() {
   const pathname = usePathname();
+  const normalizedPath = normalizePath(pathname ?? "/");
 
   return (
     <nav
@@ -71,7 +86,7 @@ export default function Navbar() {
     >
       {links.map((link) => {
         const Icon = link.icon;
-        const isActive = pathname === link.href;
+        const isActive = normalizedPath === link.href;
 
         return (
           <Link
