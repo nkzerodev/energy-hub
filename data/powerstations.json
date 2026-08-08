@@ -1,0 +1,145 @@
+[
+  {
+    "id": "bluetti-ac180",
+    "brand": "Bluetti",
+    "model": "AC180",
+    "description": "Power Station portátil con batería LiFePO4, inversor de 1800 W y entrada solar de hasta 500 W.",
+    "image": "/images/powerstations/bluetti-ac180.svg",
+    "capacity": 1152,
+    "battery": "LiFePO4",
+    "cycles": 3500,
+    "inverter": 1800,
+    "surge": 2700,
+    "weight": 16,
+    "rating": 9.2,
+
+    "solarInput": {
+      "maxPower": 500,
+      "voltageMin": 12,
+      "voltageMax": 60,
+      "currentMax": 10,
+      "maxVoc": 60
+    },
+
+    "acOutput": {
+      "voltage": 120,
+      "frequency": 60,
+      "outlets": 4
+    },
+
+    "dcOutput": {
+      "usbA": 2,
+      "usbC": 2,
+      "carPort": 1
+    },
+
+    "charging": {
+      "acPower": 1440,
+      "acTime": 1.4,
+      "solarTime": 2.8
+    },
+
+    "features": {
+      "ups": true,
+      "app": true,
+      "wifi": true,
+      "bluetooth": true
+    }
+  },
+
+  {
+    "id": "ampace-andes-1500",
+    "brand": "Ampace",
+    "model": "Andes 1500",
+    "description": "Estación de energía portátil de alta capacidad con batería LiFePO4, inversor de 1800 W y entrada solar de hasta 850 W.",
+    "image": "/images/powerstations/ampace-andes-1500.svg",
+    "capacity": 1462,
+    "battery": "LiFePO4",
+    "cycles": 4000,
+    "inverter": 1800,
+    "surge": 3600,
+    "weight": 16.7,
+    "rating": 9.5,
+
+    "solarInput": {
+      "maxPower": 850,
+      "voltageMin": 11,
+      "voltageMax": 60,
+      "currentMax": 20,
+      "maxVoc": 60
+    },
+
+    "acOutput": {
+      "voltage": 120,
+      "frequency": 60,
+      "outlets": 6
+    },
+
+    "dcOutput": {
+      "usbA": 2,
+      "usbC": 2,
+      "carPort": 1
+    },
+
+    "charging": {
+      "acPower": 1500,
+      "acTime": 1.0,
+      "solarTime": 2.0
+    },
+
+    "features": {
+      "ups": true,
+      "app": true,
+      "wifi": true,
+      "bluetooth": true
+    }
+  },
+
+  {
+    "id": "ampace-andes-1300",
+    "brand": "Ampinga",
+    "model": "Andes 1300",
+    "description": "Estación de energía portátil de alta capacidad con batería LiFePO4, inversor de 1800 W y entrada solar de hasta 850 W.",
+    "image": "/images/powerstations/ampace-andes-1500.svg",
+    "capacity": 1462,
+    "battery": "LiFePO4",
+    "cycles": 4000,
+    "inverter": 1800,
+    "surge": 3600,
+    "weight": 16.7,
+    "rating": 9.5,
+
+    "solarInput": {
+      "maxPower": 850,
+      "voltageMin": 11,
+      "voltageMax": 60,
+      "currentMax": 20,
+      "maxVoc": 60
+    },
+
+    "acOutput": {
+      "voltage": 120,
+      "frequency": 60,
+      "outlets": 6
+    },
+
+    "dcOutput": {
+      "usbA": 2,
+      "usbC": 2,
+      "carPort": 1
+    },
+
+    "charging": {
+      "acPower": 1500,
+      "acTime": 1.0,
+      "solarTime": 2.0
+    },
+
+    "features": {
+      "ups": true,
+      "app": true,
+      "wifi": true,
+      "bluetooth": true
+    }
+  }
+]
