@@ -45,17 +45,10 @@ const links = [
 ];
 
 function normalizePath(pathname: string) {
-  if (!pathname) return "/";
+  if (!pathname || pathname === "/") return "/";
 
-  const repoPrefix = typeof window !== "undefined"
-    ? window.location.pathname.split("/")[1]
-    : "";
-
-  if (repoPrefix && pathname.startsWith(`/${repoPrefix}/`)) {
-    return pathname.replace(`/${repoPrefix}`, "") || "/";
-  }
-
-  return pathname;
+  const normalized = pathname.replace(/\/+$/, "") || "/";
+  return normalized === "" ? "/" : normalized;
 }
 
 export default function Navbar() {
@@ -86,7 +79,7 @@ export default function Navbar() {
     >
       {links.map((link) => {
         const Icon = link.icon;
-        const isActive = normalizedPath === link.href;
+        const isActive = normalizedPath === normalizePath(link.href);
 
         return (
           <Link
@@ -110,7 +103,10 @@ ${
 }
 `}
           >
-            <Icon size={20} className={isActive ? "fill-none stroke-current" : ""} />
+            <Icon
+              size={20}
+              className={isActive ? "fill-none stroke-current" : "fill-none stroke-current"}
+            />
 
             <span className={`hidden md:block ${isActive ? "font-semibold" : ""}`}>
               {link.name}

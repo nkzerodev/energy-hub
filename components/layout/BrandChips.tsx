@@ -1,18 +1,33 @@
 "use client";
 
-import stations from "@/data/powerstations.json";
+import { useEffect, useState } from "react";
+
+import { fetchPowerStations } from "@/lib/powerStations";
 
 interface Props {
   selectedBrand: string;
   onSelectBrand: (brand: string) => void;
 }
 
-const brands = [
-  "Todas",
-  ...Array.from(new Set(stations.map((station) => station.brand))),
-];
-
 export default function BrandChips({ selectedBrand, onSelectBrand }: Props) {
+  const [brands, setBrands] = useState<string[]>(["Todas"]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchPowerStations()
+      .then((data) => {
+        if (!active) return;
+        setBrands(["Todas", ...Array.from(new Set(data.map((station) => station.brand)))]);
+      })
+      .catch(() => {
+        if (active) setBrands(["Todas"]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
   return (
     <div className="mt-10 flex gap-3 overflow-x-auto pb-2">
       {brands.map((brand) => {

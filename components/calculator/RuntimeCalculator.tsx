@@ -12,8 +12,9 @@ import {
   Zap,
 } from "lucide-react";
 
-import stations from "@/data/powerstations.json";
 import { defaultDevices } from "@/data/devices";
+import { fetchPowerStations } from "@/lib/powerStations";
+import type { PowerStation } from "@/types/powerstation";
 
 import {
   calculateRuntime,
@@ -31,10 +32,9 @@ function buildDeviceId(name: string, fallbackIndex: number) {
 }
 
 export default function RuntimeCalculator() {
+  const [stations, setStations] = useState<PowerStation[]>([]);
 
-  const [stationId, setStationId] = useState(
-    stations[0]?.id ?? ""
-  );
+  const [stationId, setStationId] = useState("");
 
   const [stationSearch, setStationSearch] = useState("");
 
@@ -62,26 +62,42 @@ export default function RuntimeCalculator() {
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    let active = true;
 
-    const params = new URLSearchParams(window.location.search);
-    const config = params.get("config");
+    fetchPowerStations()
+      .then((data) => {
+        if (!active) return;
+        setStations(data);
 
-    if (!config) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(decodeURIComponent(config));
-
-      if (typeof parsed?.stationId === "string") {
-        const exists = stations.some((item) => item.id === parsed.stationId);
-        if (exists) {
-          setStationId(parsed.stationId);
+        if (data.length > 0) {
+          setStationId((current) => current || data[0].id);
+          setStationSearch((current) => current || `${data[0].brand} ${data[0].model}`);
         }
-      }
+
+        if (typeof window === "undefined") {
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const config = params.get("config");
+
+        if (!config) {
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(decodeURIComponent(config));
+
+          if (typeof parsed?.stationId === "string") {
+            const exists = data.some((item) => item.id === parsed.stationId);
+            if (exists) {
+              setStationId(parsed.stationId);
+              const selected = data.find((item) => item.id === parsed.stationId);
+              if (selected) {
+                setStationSearch(`${selected.brand} ${selected.model}`);
+              }
+            }
+          }
 
       const nextBatteryStart = Number(parsed?.batteryStart);
       if (Number.isFinite(nextBatteryStart)) {
@@ -93,42 +109,50 @@ export default function RuntimeCalculator() {
         setBatteryEnd(Math.min(99, Math.max(0, nextBatteryEnd)));
       }
 
-      const parsedDevices = Array.isArray(parsed?.devices) ? parsed.devices : [];
-      const restoredDevices = parsedDevices
-        .map((item: Partial<Device> & { outputType?: "AC" | "DC" }, index: number) => {
-          const watts = Number(item.watts);
-          const quantity = Math.max(1, Number(item.quantity) || 1);
+          const parsedDevices = Array.isArray(parsed?.devices) ? parsed.devices : [];
+          const restoredDevices = parsedDevices
+            .map((item: Partial<Device> & { outputType?: "AC" | "DC" }, index: number) => {
+              const watts = Number(item.watts);
+              const quantity = Math.max(1, Number(item.quantity) || 1);
 
-          if (!Number.isFinite(watts) || watts <= 0) {
-            return null;
+              if (!Number.isFinite(watts) || watts <= 0) {
+                return null;
+              }
+
+              const defaultDevice = defaultDevices.find((device) => device.id === item.id);
+
+              if (defaultDevice) {
+                return {
+                  ...defaultDevice,
+                  quantity,
+                  outputType: item.outputType ?? defaultDevice.outputType ?? "AC",
+                } as Device;
+              }
+
+              return {
+                id: buildDeviceId(String(item.name || `Dispositivo ${index + 1}`), index),
+                name: String(item.name || `Dispositivo ${index + 1}`),
+                watts,
+                quantity,
+                outputType: item.outputType ?? "AC",
+              } as Device;
+            })
+            .filter(Boolean) as Device[];
+
+          if (restoredDevices.length > 0) {
+            setDevices(restoredDevices);
           }
+        } catch {
+          // Ignore invalid config
+        }
+      })
+      .catch(() => {
+        if (active) setStations([]);
+      });
 
-          const defaultDevice = defaultDevices.find((device) => device.id === item.id);
-
-          if (defaultDevice) {
-            return {
-              ...defaultDevice,
-              quantity,
-              outputType: item.outputType ?? defaultDevice.outputType ?? "AC",
-            } as Device;
-          }
-
-          return {
-            id: buildDeviceId(String(item.name || `Dispositivo ${index + 1}`), index),
-            name: String(item.name || `Dispositivo ${index + 1}`),
-            watts,
-            quantity,
-            outputType: item.outputType ?? "AC",
-          } as Device;
-        })
-        .filter(Boolean) as Device[];
-
-      if (restoredDevices.length > 0) {
-        setDevices(restoredDevices);
-      }
-    } catch {
-      // Ignore invalid config
-    }
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {

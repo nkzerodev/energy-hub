@@ -5,14 +5,30 @@ import Link from "next/link";
 import { ArrowRight, Heart } from "lucide-react";
 
 import PowerStationCard from "@/components/PowerStationCard";
-import stations from "@/data/powerstations.json";
+import { fetchPowerStations } from "@/lib/powerStations";
 import { getFavoriteStationIds } from "@/lib/favorites";
+import type { PowerStation } from "@/types/powerstation";
 
 export default function FavoritesPage() {
+  const [stations, setStations] = useState<PowerStation[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
   useEffect(() => {
     setFavoriteIds(getFavoriteStationIds());
+
+    let active = true;
+
+    fetchPowerStations()
+      .then((data) => {
+        if (active) setStations(data);
+      })
+      .catch(() => {
+        if (active) setStations([]);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const favoriteStations = stations.filter((station) =>

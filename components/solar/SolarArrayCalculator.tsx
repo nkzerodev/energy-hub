@@ -11,7 +11,8 @@ import {
   Share2,
 } from "lucide-react";
 
-import stations from "@/data/powerstations.json";
+import { fetchPowerStations } from "@/lib/powerStations";
+import type { PowerStation } from "@/types/powerstation";
 
 import {
   checkSolarCompatibility,
@@ -23,12 +24,18 @@ type ConnectionMode = "series" | "parallel";
 
 
 export default function SolarArrayCalculator() {
+  const [stations, setStations] = useState<PowerStation[]>([]);
 
   const [stationId, setStationId] =
-    useState(stations[0]?.id ?? "");
-  
-  const [stationSearch, setStationSearch] =
     useState("");
+
+  const [stationSearch, setStationSearch] =
+    useState(() => {
+      const firstStation = stations[0];
+      return firstStation
+        ? `${firstStation.brand} ${firstStation.model}`
+        : "";
+    });
 
   const [showStations, setShowStations] =
     useState(false);
@@ -139,26 +146,43 @@ export default function SolarArrayCalculator() {
 
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    let active = true;
 
-    const params = new URLSearchParams(window.location.search);
-    const config = params.get("config");
+    fetchPowerStations()
+      .then((data) => {
+        if (!active) return;
+        setStations(data);
 
-    if (!config) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(decodeURIComponent(config));
-
-      if (typeof parsed?.stationId === "string") {
-        const exists = stations.some((item) => item.id === parsed.stationId);
-        if (exists) {
-          setStationId(parsed.stationId);
+        if (data.length > 0) {
+          setStationId((current) => current || data[0].id);
+          setStationSearch((current) => current || `${data[0].brand} ${data[0].model}`);
         }
-      }
+
+        if (typeof window === "undefined") {
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const config = params.get("config");
+
+        if (!config) {
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(decodeURIComponent(config));
+
+          if (typeof parsed?.stationId === "string") {
+            const exists = data.some((item) => item.id === parsed.stationId);
+            if (exists) {
+              setStationId(parsed.stationId);
+
+              const selected = data.find((item) => item.id === parsed.stationId);
+              if (selected) {
+                setStationSearch(`${selected.brand} ${selected.model}`);
+              }
+            }
+          }
 
       if (typeof parsed?.connectionMode === "string" && (parsed.connectionMode === "series" || parsed.connectionMode === "parallel")) {
         setConnectionMode(parsed.connectionMode);
@@ -169,22 +193,30 @@ export default function SolarArrayCalculator() {
         setPanelCount(Math.max(1, Math.floor(nextPanelCount)));
       }
 
-      if (parsed?.panel && typeof parsed.panel === "object") {
-        const nextPanel: SolarPanel = {
-          power: Number(parsed.panel.power),
-          voc: Number(parsed.panel.voc),
-          vmp: Number(parsed.panel.vmp),
-          isc: Number(parsed.panel.isc),
-          imp: Number(parsed.panel.imp),
-        };
+          if (parsed?.panel && typeof parsed.panel === "object") {
+            const nextPanel: SolarPanel = {
+              power: Number(parsed.panel.power),
+              voc: Number(parsed.panel.voc),
+              vmp: Number(parsed.panel.vmp),
+              isc: Number(parsed.panel.isc),
+              imp: Number(parsed.panel.imp),
+            };
 
-        if (Object.values(nextPanel).every((value) => Number.isFinite(value))) {
-          setPanel(nextPanel);
+            if (Object.values(nextPanel).every((value) => Number.isFinite(value))) {
+              setPanel(nextPanel);
+            }
+          }
+        } catch {
+          // Ignore invalid config
         }
-      }
-    } catch {
-      // Ignore invalid config
-    }
+      })
+      .catch(() => {
+        if (active) setStations([]);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
 
@@ -344,10 +376,7 @@ export default function SolarArrayCalculator() {
                 />
 
                 <input
-                value={
-                    stationSearch ||
-                    `${station?.brand ?? ""} ${station?.model ?? ""}`
-                }
+                value={stationSearch}
                 onChange={(event) => {
                     setStationSearch(event.target.value);
                     setShowStations(true);

@@ -10,7 +10,8 @@ import {
   XCircle,
 } from "lucide-react";
 
-import stations from "@/data/powerstations.json";
+import { fetchPowerStations } from "@/lib/powerStations";
+import type { PowerStation } from "@/types/powerstation";
 
 import {
   checkSolarCompatibility,
@@ -27,9 +28,10 @@ type SolarField =
 
 
 export default function SolarCompatibility() {
+  const [stations, setStations] = useState<PowerStation[]>([]);
 
   const [stationId, setStationId] =
-    useState(stations[0]?.id ?? "");
+    useState("");
 
   const [stationSearch, setStationSearch] =
     useState("");
@@ -219,26 +221,42 @@ export default function SolarCompatibility() {
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    let active = true;
 
-    const params = new URLSearchParams(window.location.search);
-    const config = params.get("config");
+    fetchPowerStations()
+      .then((data) => {
+        if (!active) return;
+        setStations(data);
 
-    if (!config) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(decodeURIComponent(config));
-
-      if (typeof parsed?.stationId === "string") {
-        const exists = stations.some((item) => item.id === parsed.stationId);
-        if (exists) {
-          setStationId(parsed.stationId);
+        if (data.length > 0) {
+          setStationId((current) => current || data[0].id);
+          setStationSearch((current) => current || `${data[0].brand} ${data[0].model}`);
         }
-      }
+
+        if (typeof window === "undefined") {
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const config = params.get("config");
+
+        if (!config) {
+          return;
+        }
+
+        try {
+          const parsed = JSON.parse(decodeURIComponent(config));
+
+          if (typeof parsed?.stationId === "string") {
+            const exists = data.some((item) => item.id === parsed.stationId);
+            if (exists) {
+              setStationId(parsed.stationId);
+              const selected = data.find((item) => item.id === parsed.stationId);
+              if (selected) {
+                setStationSearch(`${selected.brand} ${selected.model}`);
+              }
+            }
+          }
 
       if (parsed?.panel && typeof parsed.panel === "object") {
         const nextPanel: SolarPanel = {
@@ -254,13 +272,21 @@ export default function SolarCompatibility() {
         }
       }
 
-      const nextMode = parsed?.calculationMode;
-      if (nextMode === "power" || nextMode === "vmp" || nextMode === "imp") {
-        setCalculationMode(nextMode);
-      }
-    } catch {
-      // Ignore invalid config
-    }
+          const nextMode = parsed?.calculationMode;
+          if (nextMode === "power" || nextMode === "vmp" || nextMode === "imp") {
+            setCalculationMode(nextMode);
+          }
+        } catch {
+          // Ignore invalid config
+        }
+      })
+      .catch(() => {
+        if (active) setStations([]);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {

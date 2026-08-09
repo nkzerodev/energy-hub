@@ -3,43 +3,56 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Search, X, Check, Share2 } from "lucide-react";
 
-import stations from "@/data/powerstations.json";
-
-type Station = (typeof stations)[number];
+import { fetchPowerStations } from "@/lib/powerStations";
+import type { PowerStation } from "@/types/powerstation";
 
 export default function CompararPage() {
-  const [selectedIds, setSelectedIds] = useState<string[]>(
-    stations.slice(0, 2).map((station) => station.id)
-  );
+  const [stations, setStations] = useState<PowerStation[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+    let active = true;
 
-    const params = new URLSearchParams(window.location.search);
-    const idsParam = params.get("ids");
+    fetchPowerStations()
+      .then((data) => {
+        if (!active) return;
 
-    if (!idsParam) {
-      return;
-    }
+        setStations(data);
 
-    const parsedIds = idsParam
-      .split(",")
-      .map((id) => id.trim())
-      .filter(Boolean);
+        const initial = data.slice(0, 2).map((station) => station.id);
+        setSelectedIds(initial);
 
-    const validIds = parsedIds.filter((id) =>
-      stations.some((station) => station.id === id)
-    );
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const idsParam = params.get("ids");
 
-    if (validIds.length > 0) {
-      setSelectedIds(validIds.slice(0, 4));
-    }
+          if (idsParam) {
+            const parsedIds = idsParam
+              .split(",")
+              .map((id) => id.trim())
+              .filter(Boolean);
+
+            const validIds = parsedIds.filter((id) =>
+              data.some((station) => station.id === id)
+            );
+
+            if (validIds.length > 0) {
+              setSelectedIds(validIds.slice(0, 4));
+            }
+          }
+        }
+      })
+      .catch(() => {
+        if (active) setStations([]);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -62,8 +75,8 @@ export default function CompararPage() {
   const selectedStations = useMemo(() => {
     return selectedIds
       .map((id) => stations.find((station) => station.id === id))
-      .filter(Boolean) as Station[];
-  }, [selectedIds]);
+      .filter(Boolean) as PowerStation[];
+  }, [selectedIds, stations]);
 
   const filteredStations = useMemo(() => {
     const query = search.toLowerCase().trim();
@@ -512,8 +525,8 @@ function ComparisonRow({
   highlight,
 }: {
   label: string;
-  stations: Station[];
-  getValue: (station: Station) => string;
+  stations: PowerStation[];
+  getValue: (station: PowerStation) => string;
   highlight?: "max" | "min";
 }) {
 

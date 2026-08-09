@@ -60,14 +60,14 @@ export default function PowerStationCard({
 
         className="group overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl transition-all duration-300 hover:border-blue-500/40">
 
-            <div className="relative flex h-52 items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-900 via-black to-zinc-950">
+            <div className="relative h-52 overflow-hidden bg-zinc-950">
 
                 <Image
                     src={getAssetPath(station.image ?? "/images/powerstations/placeholder.svg")}
                     alt={`${station.brand} ${station.model}`}
                     width={800}
                     height={520}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full bg-zinc-950 object-contain transition-transform duration-300 group-hover:scale-[1.03]"
                 />
 
             </div>

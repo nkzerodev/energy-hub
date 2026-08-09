@@ -1,31 +1,43 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 
 import PowerStationCard from "@/components/PowerStationCard";
-import stations from "@/data/powerstations.json";
+import { fetchPowerStations } from "@/lib/powerStations";
+import type { PowerStation } from "@/types/powerstation";
 
 export default function Catalog() {
+  const [stations, setStations] = useState<PowerStation[]>([]);
   const [search, setSearch] = useState("");
   const [brand, setBrand] = useState("Todas");
 
+  useEffect(() => {
+    let active = true;
+
+    fetchPowerStations()
+      .then((data) => {
+        if (active) setStations(data);
+      })
+      .catch(() => {
+        if (active) setStations([]);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const brands = [
     "Todas",
-    ...Array.from(
-      new Set(stations.map((station) => station.brand))
-    ),
+    ...Array.from(new Set(stations.map((station) => station.brand))),
   ];
 
   const filteredStations = useMemo(() => {
     const query = search.toLowerCase().trim();
 
     return stations.filter((station) => {
-
-      const matchesBrand =
-        brand === "Todas" ||
-        station.brand === brand;
-
+      const matchesBrand = brand === "Todas" || station.brand === brand;
       const matchesSearch =
         query === "" ||
         `${station.brand} ${station.model} ${station.capacity} ${station.inverter} ${station.battery}`
@@ -34,8 +46,7 @@ export default function Catalog() {
 
       return matchesBrand && matchesSearch;
     });
-
-  }, [search, brand]);
+  }, [search, brand, stations]);
 
 
   return (
