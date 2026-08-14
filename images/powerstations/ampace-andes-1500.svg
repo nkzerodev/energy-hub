@@ -1,0 +1,21 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="600" rx="48" fill="#020617"/>
+  <rect x="70" y="90" width="660" height="420" rx="36" fill="url(#bg)"/>
+  <rect x="118" y="142" width="564" height="316" rx="24" fill="#0B1120" stroke="#34D399" stroke-opacity="0.35" stroke-width="3"/>
+  <rect x="164" y="184" width="472" height="232" rx="28" fill="#111827" stroke="#F8FAFC" stroke-opacity="0.14"/>
+  <rect x="198" y="220" width="120" height="56" rx="16" fill="#34D399"/>
+  <rect x="338" y="220" width="120" height="56" rx="16" fill="#38BDF8"/>
+  <rect x="478" y="220" width="120" height="56" rx="16" fill="#F59E0B"/>
+  <rect x="198" y="304" width="400" height="24" rx="12" fill="#F8FAFC" fill-opacity="0.8"/>
+  <rect x="198" y="342" width="300" height="24" rx="12" fill="#F8FAFC" fill-opacity="0.55"/>
+  <circle cx="612" cy="170" r="36" fill="#34D399" fill-opacity="0.15"/>
+  <path d="M612 144V198" stroke="#34D399" stroke-width="10" stroke-linecap="round"/>
+  <path d="M586 171H638" stroke="#34D399" stroke-width="10" stroke-linecap="round"/>
+  <text x="400" y="506" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700" fill="#F8FAFC">Ampace Andes 1500</text>
+  <defs>
+    <linearGradient id="bg" x1="70" y1="90" x2="730" y2="510" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#166534"/>
+      <stop offset="1" stop-color="#020617"/>
+    </linearGradient>
+  </defs>
+</svg>

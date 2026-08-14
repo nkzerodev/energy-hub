@@ -1,0 +1,3 @@
+:HL["/energy-hub/_next/static/chunks/032j7-wwz70u4.css","style"]
+:HC["/",""]
+0:{"tree":{"name":"","param":null,"prefetchHints":16,"slots":{"children":{"name":"comparar","param":null,"prefetchHints":0,"slots":{"children":{"name":"__PAGE__","param":null,"prefetchHints":0,"slots":null}}}}},"staleTime":300,"buildId":"_txfy9UDNWSrAywa85PMq"}
