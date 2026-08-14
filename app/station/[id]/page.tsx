@@ -18,7 +18,13 @@ export async function generateStaticParams() {
   }));
 }
 
-export const dynamicParams = false;
+// NOTE:
+// `dynamicParams: true` cannot be used with `output: "export"` (static export).
+// Static exports pre-render routes returned by `generateStaticParams` at build time.
+// New stations added after deployment will not have a generated page until
+// the site is rebuilt and redeployed. If you need runtime-generated pages,
+// consider deploying to a platform that supports Next.js server rendering
+// (or remove `output: "export"` in `next.config.ts`).
 
 export default async function StationPage({ params }: Props) {
   const { id } = await params;
