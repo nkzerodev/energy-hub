@@ -209,11 +209,21 @@ export default function StationHero({ station }: Props) {
             text-yellow-400
           ">
 
-            <Star fill="currentColor"/>
+            <div className="flex items-center gap-1">
+              {(() => {
+                const filled = Math.round((station.rating ?? 0) / 2);
+                return Array.from({ length: 5 }).map((_, i) => (
+                  <Star
+                    key={i}
+                    className={i < filled ? "text-yellow-400" : "text-zinc-600"}
+                    {...(i < filled ? { fill: "currentColor" } : {})}
+                    size={18}
+                  />
+                ));
+              })()}
 
-            <span className="font-bold">
-              {station.rating}/10
-            </span>
+              <span className="ml-2 font-bold text-sm text-zinc-200">{Math.round((station.rating ?? 0) / 2)}/5</span>
+            </div>
 
           </div>
 

@@ -53,6 +53,7 @@ export default function AdminPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [rebuildLoading, setRebuildLoading] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [stations, setStations] = useState<PowerStation[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -212,6 +213,7 @@ export default function AdminPage() {
       setSelectedId(null);
       setForm(emptyForm);
       await loadStations();
+      void triggerRebuild();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo guardar la Power Station");
     } finally {
@@ -229,8 +231,29 @@ export default function AdminPage() {
         setForm(emptyForm);
       }
       await loadStations();
+      void triggerRebuild();
     } catch (err) {
       setError(err instanceof Error ? err.message : "No se pudo borrar la Power Station");
+    }
+  }
+
+  async function triggerRebuild() {
+    if (!supabase) return;
+
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) return;
+
+      await fetch("/api/rebuild", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+    } catch (e) {
+      // ignore rebuild errors in UI
     }
   }
 
@@ -332,6 +355,7 @@ export default function AdminPage() {
               <h2 className="text-xl font-bold">Power Stations</h2>
               <div className="flex gap-2">
                 <button onClick={() => void loadStations()} className="rounded-xl border border-white/10 px-3 py-2 text-sm hover:bg-white/5">Recargar</button>
+                <button onClick={async () => { setRebuildLoading(true); await triggerRebuild(); setRebuildLoading(false); }} className="rounded-xl border border-white/10 px-3 py-2 text-sm hover:bg-white/5">{rebuildLoading ? "Rebuilding..." : "Rebuild"}</button>
                 <button onClick={handleLogout} className="rounded-xl border border-white/10 px-3 py-2 text-sm hover:bg-white/5">Cerrar sesión</button>
               </div>
             </div>
